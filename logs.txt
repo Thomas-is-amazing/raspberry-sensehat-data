@@ -1,0 +1,24 @@
+WARNING:root:Failed to initialise TCS34725 colour sensor. (sensor not present)
+RMS Acceleration X: 0.00 g
+RMS Acceleration Y: 0.19 g
+RMS Acceleration Z: 0.98 g
+RMS Gyroscope X: 0.01 °/s
+RMS Gyroscope Y: 0.02 °/s
+RMS Gyroscope Z: 0.01 °/s
+Traceback (most recent call last):
+  File "/home/thomas/raspberry-sensehat-data/__main__.py", line 83, in <module>
+    frequencies_x, magnitudes_x = fft_magnitudes(accel_x_complex, sampling_rate)
+  File "/home/thomas/raspberry-sensehat-data/__main__.py", line 69, in fft_magnitudes
+    f_values = fft(values)
+  File "/home/thomas/raspberry-sensehat-data/__main__.py", line 58, in fft
+    even = fft(x[0::2])
+  File "/home/thomas/raspberry-sensehat-data/__main__.py", line 58, in fft
+    even = fft(x[0::2])
+  File "/home/thomas/raspberry-sensehat-data/__main__.py", line 58, in fft
+    even = fft(x[0::2])
+  [Previous line repeated 2 more times]
+  File "/home/thomas/raspberry-sensehat-data/__main__.py", line 60, in fft
+    T = [math.e**(-2j * math.pi * k / N) * odd[k] for k in range(N // 2)]
+  File "/home/thomas/raspberry-sensehat-data/__main__.py", line 60, in <listcomp>
+    T = [math.e**(-2j * math.pi * k / N) * odd[k] for k in range(N // 2)]
+IndexError: list index out of range
