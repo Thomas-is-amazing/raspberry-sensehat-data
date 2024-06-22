@@ -1,44 +1,72 @@
-from sense_hat import SenseHat
-import time
+from sense_hat import SenseHat  # To access Sense HAT sensor data
+import time  # To use time functions for delays
+import numpy as np  # To perform numerical operations on data
+from scipy.fft import fft  # To perform FFT analysis
 
 sense = SenseHat()
 
-while True:
-    # Get temperature
-    temp = sense.get_temperature()
-    print("Temperature: {:.2f} °C".format(temp))
+# Parameters
+sampling_rate = 50  # samples per second
+record_time = 10    # seconds
 
-    # Get humidity
-    humidity = sense.get_humidity()
-    print("Humidity: {:.2f} %".format(humidity))
+# Initialize arrays for data storage
+accel_data = {'x': [], 'y': [], 'z': []}
+gyro_data = {'x': [], 'y': [], 'z': []}
 
-    # Get pressure
-    pressure = sense.get_pressure()
-    print("Pressure: {:.2f} hPa".format(pressure))
-
-    # Get orientation
-    orientation = sense.get_orientation()
-    print("Pitch: {:.2f}°".format(orientation['pitch']))
-    print("Roll: {:.2f}°".format(orientation['roll']))
-    print("Yaw: {:.2f}°".format(orientation['yaw']))
-
+start_time = time.time()
+while time.time() - start_time < record_time:
     # Get accelerometer data
     acceleration = sense.get_accelerometer_raw()
-    print("Acceleration X: {:.2f} g".format(acceleration['x']))
-    print("Acceleration Y: {:.2f} g".format(acceleration['y']))
-    print("Acceleration Z: {:.2f} g".format(acceleration['z']))
+    accel_data['x'].append(acceleration['x'])
+    accel_data['y'].append(acceleration['y'])
+    accel_data['z'].append(acceleration['z'])
 
     # Get gyroscope data
     gyro = sense.get_gyroscope_raw()
-    print("Gyroscope X: {:.2f} °/s".format(gyro['x']))
-    print("Gyroscope Y: {:.2f} °/s".format(gyro['y']))
-    print("Gyroscope Z: {:.2f} °/s".format(gyro['z']))
+    gyro_data['x'].append(gyro['x'])
+    gyro_data['y'].append(gyro['y'])
+    gyro_data['z'].append(gyro['z'])
 
-    # Get magnetometer data
-    mag = sense.get_compass_raw()
-    print("Magnetometer X: {:.2f} μT".format(mag['x']))
-    print("Magnetometer Y: {:.2f} μT".format(mag['y']))
-    print("Magnetometer Z: {:.2f} μT".format(mag['z']))
+    # Wait for the next sample
+    time.sleep(1 / sampling_rate)
 
-    # Wait for a second before next read
-    time.sleep(10)
+# Convert lists to numpy arrays
+accel_x = np.array(accel_data['x'])
+accel_y = np.array(accel_data['y'])
+accel_z = np.array(accel_data['z'])
+
+gyro_x = np.array(gyro_data['x'])
+gyro_y = np.array(gyro_data['y'])
+gyro_z = np.array(gyro_data['z'])
+
+# Calculate RMS values
+rms_accel_x = np.sqrt(np.mean(accel_x**2))
+rms_accel_y = np.sqrt(np.mean(accel_y**2))
+rms_accel_z = np.sqrt(np.mean(accel_z**2))
+
+rms_gyro_x = np.sqrt(np.mean(gyro_x**2))
+rms_gyro_y = np.sqrt(np.mean(gyro_y**2))
+rms_gyro_z = np.sqrt(np.mean(gyro_z**2))
+
+print("RMS Acceleration X: {:.2f} g".format(rms_accel_x))
+print("RMS Acceleration Y: {:.2f} g".format(rms_accel_y))
+print("RMS Acceleration Z: {:.2f} g".format(rms_accel_z))
+
+print("RMS Gyroscope X: {:.2f} °/s".format(rms_gyro_x))
+print("RMS Gyroscope Y: {:.2f} °/s".format(rms_gyro_y))
+print("RMS Gyroscope Z: {:.2f} °/s".format(rms_gyro_z))
+
+# Perform FFT analysis on accelerometer data
+n = len(accel_x)
+t = 1.0 / sampling_rate
+xf = np.fft.fftfreq(n, t)
+yf_x = np.abs(fft(accel_x))
+yf_y = np.abs(fft(accel_y))
+yf_z = np.abs(fft(accel_z))
+
+print("Frequency domain analysis (Acceleration X):")
+for freq, magnitude in zip(xf, yf_x):
+    if freq > 0:
+        print("Frequency: {:.2f} Hz, Magnitude: {:.2f}".format(freq, magnitude))
+
+# Similarly, you can analyze yf_y and yf_z
