@@ -31,7 +31,7 @@ while time.time() - start_time < record_time:
 
 # Helper function to calculate RMS
 def calculate_rms(values):
-    return math.sqrt(sum([v**2 for v in values]) / len(values))
+    return math.sqrt(sum(v**2 for v in values) / len(values)) if values else 0
 
 # Calculate RMS values
 rms_accel_x = calculate_rms(accel_data['x'])
@@ -53,24 +53,31 @@ print("RMS Gyroscope Z: {:.2f} °/s".format(rms_gyro_z))
 # Helper function for FFT
 def fft(x):
     N = len(x)
-    if N <= 1: return x
+    if N <= 1: 
+        return x
     even = fft(x[0::2])
-    odd =  fft(x[1::2])
-    T= [math.e**(-2j*math.pi*k/N)*odd[k] for k in range(N//2)]
-    return [even[k] + T[k] for k in range(N//2)] + [even[k] - T[k] for k in range(N//2)]
+    odd = fft(x[1::2])
+    T = [math.e**(-2j * math.pi * k / N) * odd[k] for k in range(N // 2)]
+    return [even[k] + T[k] for k in range(N // 2)] + [even[k] - T[k] for k in range(N // 2)]
 
 # Perform FFT analysis on accelerometer data
 def fft_magnitudes(values, sampling_rate):
     N = len(values)
+    if N == 0:
+        return [], []
+    
     f_values = fft(values)
     magnitudes = [abs(f) for f in f_values[:N // 2]]
     frequencies = [i * sampling_rate / N for i in range(N // 2)]
     return frequencies, magnitudes
 
 # Convert data to complex format for FFT
-accel_x_complex = [complex(v, 0) for v in accel_data['x']]
-accel_y_complex = [complex(v, 0) for v in accel_data['y']]
-accel_z_complex = [complex(v, 0) for v in accel_data['z']]
+def convert_to_complex(data_list):
+    return [complex(v, 0) for v in data_list]
+
+accel_x_complex = convert_to_complex(accel_data['x'])
+accel_y_complex = convert_to_complex(accel_data['y'])
+accel_z_complex = convert_to_complex(accel_data['z'])
 
 # Get frequency and magnitude for X axis
 frequencies_x, magnitudes_x = fft_magnitudes(accel_x_complex, sampling_rate)
