@@ -43,6 +43,10 @@ rms_gyro_x = calculate_rms(gyro_data['x'])
 rms_gyro_y = calculate_rms(gyro_data['y'])
 rms_gyro_z = calculate_rms(gyro_data['z'])
 
+total_gyro = math.sqrt(rms_gyro_x**2 + rms_gyro_y**2 + rms_gyro_z**2)
+total_accel = math.sqrt(rms_accel_x**2 + rms_accel_y**2 + rms_accel_z**2)
+
+
 print("RMS Acceleration X: {:.4f} g".format(rms_accel_x))
 print("RMS Acceleration Y: {:.4f} g".format(rms_accel_y))
 print("RMS Acceleration Z: {:.4f} g".format(rms_accel_z))
@@ -50,3 +54,8 @@ print("RMS Acceleration Z: {:.4f} g".format(rms_accel_z))
 print("RMS Gyroscope X: {:.4f} °/s".format(rms_gyro_x))
 print("RMS Gyroscope Y: {:.4f} °/s".format(rms_gyro_y))
 print("RMS Gyroscope Z: {:.4f} °/s".format(rms_gyro_z))
+
+print("==============")
+print("Total Acceleration: {:.4f} g".format(total_accel))
+print("Total Gyroscope: {:.4f} °/s".format(total_gyro))
+```
