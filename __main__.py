@@ -1,6 +1,7 @@
 from sense_hat import SenseHat  # To access Sense HAT sensor data
 import time  # To use time functions for delays
 import math  # To perform mathematical operations
+import cmath  # For handling complex numbers
 
 sense = SenseHat()
 
@@ -53,11 +54,11 @@ print("RMS Gyroscope Z: {:.2f} °/s".format(rms_gyro_z))
 # Helper function for FFT
 def fft(x):
     N = len(x)
-    if N <= 1: 
+    if N <= 1:
         return x
     even = fft(x[0::2])
     odd = fft(x[1::2])
-    T = [math.e**(-2j * math.pi * k / N) * odd[k] for k in range(N // 2)]
+    T = [cmath.exp(-2j * cmath.pi * k / N) * odd[k] for k in range(N // 2)]
     return [even[k] + T[k] for k in range(N // 2)] + [even[k] - T[k] for k in range(N // 2)]
 
 # Perform FFT analysis on accelerometer data
