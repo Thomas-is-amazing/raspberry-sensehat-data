@@ -1,7 +1,6 @@
 from sense_hat import SenseHat  # To access Sense HAT sensor data
 import time  # To use time functions for delays
 import numpy as np  # To perform numerical operations on data
-from scipy.fft import fft  # To perform FFT analysis
 
 sense = SenseHat()
 
@@ -56,13 +55,13 @@ print("RMS Gyroscope X: {:.2f} °/s".format(rms_gyro_x))
 print("RMS Gyroscope Y: {:.2f} °/s".format(rms_gyro_y))
 print("RMS Gyroscope Z: {:.2f} °/s".format(rms_gyro_z))
 
-# Perform FFT analysis on accelerometer data
+# Perform FFT analysis on accelerometer data using numpy
 n = len(accel_x)
 t = 1.0 / sampling_rate
 xf = np.fft.fftfreq(n, t)
-yf_x = np.abs(fft(accel_x))
-yf_y = np.abs(fft(accel_y))
-yf_z = np.abs(fft(accel_z))
+yf_x = np.abs(np.fft.fft(accel_x))
+yf_y = np.abs(np.fft.fft(accel_y))
+yf_z = np.abs(np.fft.fft(accel_z))
 
 print("Frequency domain analysis (Acceleration X):")
 for freq, magnitude in zip(xf, yf_x):
