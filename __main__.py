@@ -58,4 +58,3 @@ print("RMS Gyroscope Z: {:.4f} °/s".format(rms_gyro_z))
 print("==============")
 print("Total Acceleration: {:.4f} g".format(total_accel))
 print("Total Gyroscope: {:.4f} °/s".format(total_gyro))
-```
