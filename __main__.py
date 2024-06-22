@@ -1,6 +1,6 @@
 from sense_hat import SenseHat  # To access Sense HAT sensor data
 import time  # To use time functions for delays
-import numpy as np  # To perform numerical operations on data
+import math  # To perform mathematical operations
 
 sense = SenseHat()
 
@@ -8,7 +8,7 @@ sense = SenseHat()
 sampling_rate = 50  # samples per second
 record_time = 10    # seconds
 
-# Initialize arrays for data storage
+# Initialize lists for data storage
 accel_data = {'x': [], 'y': [], 'z': []}
 gyro_data = {'x': [], 'y': [], 'z': []}
 
@@ -29,23 +29,18 @@ while time.time() - start_time < record_time:
     # Wait for the next sample
     time.sleep(1 / sampling_rate)
 
-# Convert lists to numpy arrays
-accel_x = np.array(accel_data['x'])
-accel_y = np.array(accel_data['y'])
-accel_z = np.array(accel_data['z'])
-
-gyro_x = np.array(gyro_data['x'])
-gyro_y = np.array(gyro_data['y'])
-gyro_z = np.array(gyro_data['z'])
+# Helper function to calculate RMS
+def calculate_rms(values):
+    return math.sqrt(sum([v**2 for v in values]) / len(values))
 
 # Calculate RMS values
-rms_accel_x = np.sqrt(np.mean(accel_x**2))
-rms_accel_y = np.sqrt(np.mean(accel_y**2))
-rms_accel_z = np.sqrt(np.mean(accel_z**2))
+rms_accel_x = calculate_rms(accel_data['x'])
+rms_accel_y = calculate_rms(accel_data['y'])
+rms_accel_z = calculate_rms(accel_data['z'])
 
-rms_gyro_x = np.sqrt(np.mean(gyro_x**2))
-rms_gyro_y = np.sqrt(np.mean(gyro_y**2))
-rms_gyro_z = np.sqrt(np.mean(gyro_z**2))
+rms_gyro_x = calculate_rms(gyro_data['x'])
+rms_gyro_y = calculate_rms(gyro_data['y'])
+rms_gyro_z = calculate_rms(gyro_data['z'])
 
 print("RMS Acceleration X: {:.2f} g".format(rms_accel_x))
 print("RMS Acceleration Y: {:.2f} g".format(rms_accel_y))
@@ -55,17 +50,34 @@ print("RMS Gyroscope X: {:.2f} °/s".format(rms_gyro_x))
 print("RMS Gyroscope Y: {:.2f} °/s".format(rms_gyro_y))
 print("RMS Gyroscope Z: {:.2f} °/s".format(rms_gyro_z))
 
-# Perform FFT analysis on accelerometer data using numpy
-n = len(accel_x)
-t = 1.0 / sampling_rate
-xf = np.fft.fftfreq(n, t)
-yf_x = np.abs(np.fft.fft(accel_x))
-yf_y = np.abs(np.fft.fft(accel_y))
-yf_z = np.abs(np.fft.fft(accel_z))
+# Helper function for FFT
+def fft(x):
+    N = len(x)
+    if N <= 1: return x
+    even = fft(x[0::2])
+    odd =  fft(x[1::2])
+    T= [math.e**(-2j*math.pi*k/N)*odd[k] for k in range(N//2)]
+    return [even[k] + T[k] for k in range(N//2)] + [even[k] - T[k] for k in range(N//2)]
+
+# Perform FFT analysis on accelerometer data
+def fft_magnitudes(values, sampling_rate):
+    N = len(values)
+    f_values = fft(values)
+    magnitudes = [abs(f) for f in f_values[:N // 2]]
+    frequencies = [i * sampling_rate / N for i in range(N // 2)]
+    return frequencies, magnitudes
+
+# Convert data to complex format for FFT
+accel_x_complex = [complex(v, 0) for v in accel_data['x']]
+accel_y_complex = [complex(v, 0) for v in accel_data['y']]
+accel_z_complex = [complex(v, 0) for v in accel_data['z']]
+
+# Get frequency and magnitude for X axis
+frequencies_x, magnitudes_x = fft_magnitudes(accel_x_complex, sampling_rate)
 
 print("Frequency domain analysis (Acceleration X):")
-for freq, magnitude in zip(xf, yf_x):
+for freq, magnitude in zip(frequencies_x, magnitudes_x):
     if freq > 0:
         print("Frequency: {:.2f} Hz, Magnitude: {:.2f}".format(freq, magnitude))
 
-# Similarly, you can analyze yf_y and yf_z
+# Similarly, you can analyze frequencies_y and frequencies_z
