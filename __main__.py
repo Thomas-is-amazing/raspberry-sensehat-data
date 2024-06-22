@@ -1,4 +1,4 @@
-`from sense_hat import SenseHat  # To access Sense HAT sensor data
+from sense_hat import SenseHat  # To access Sense HAT sensor data
 import time  # To use time functions for delays
 import math  # To perform mathematical operations
 import cmath  # For handling complex numbers
